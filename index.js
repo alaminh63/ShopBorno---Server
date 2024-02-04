@@ -45,6 +45,9 @@ async function run() {
 
     const usersCollection = client.db("shopBorno").collection("users");
     const productsCollection = client.db("shopBorno").collection("products");
+    const cartProductsCollection = client
+      .db("shopBorno")
+      .collection("cartProducts");
 
     // jwt section
     app.post("/jwt", (req, res) => {
@@ -111,7 +114,7 @@ async function run() {
       res.send(result);
     });
 
-    // get single phones
+    // get single products
     app.get("/products/:category", async (req, res) => {
       const category = req.params.category.toLowerCase(); // Convert to lowercase for case-insensitive matching
       const query = { category: category };
@@ -135,7 +138,7 @@ async function run() {
       }
     });
 
-    // get all phones
+    // get all products
     app.get("/singleProduct/:id", async (req, res) => {
       const id = req.params.id;
       const query = { _id: new ObjectId(id) };
@@ -146,6 +149,32 @@ async function run() {
         console.error(error);
         res.status(500).send({ error: true, message: "Internal Server Error" });
       }
+    });
+
+    // adding product in cart
+    app.post("/cartProducts", async (req, res) => {
+      try {
+        const cartProduct = req.body;
+        const query = {
+          productId: cartProduct.productId,
+          email: cartProduct.email,
+        };
+        const existingProduct = await cartProductsCollection.findOne(query);
+        if (existingProduct) {
+          return res.send({ message: "Product already added to cart" });
+        }
+        const result = await cartProductsCollection.insertOne(cartProduct);
+        res.send({ insertedId: result.insertedId });
+      } catch (error) {
+        console.error("Error adding product to cart:", error);
+        res.status(500).send({ message: "Internal server error" });
+      }
+    });
+    app.get("/cartProducts/:email", async (req, res) => {
+      const email = req.params.email;
+      const query = { email: email };
+      const result = await cartProductsCollection.find(query).toArray();
+      res.send(result);
     });
 
     // feedback section here
