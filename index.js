@@ -116,7 +116,7 @@ async function run() {
 
     // get single products
     app.get("/products/:category", async (req, res) => {
-      const category = req.params.category.toLowerCase(); // Convert to lowercase for case-insensitive matching
+      const category = req.params.category.toLowerCase();
       const query = { category: category };
       try {
         const result = await productsCollection.find(query).toArray();
@@ -127,7 +127,7 @@ async function run() {
       }
     });
     app.get("/subProducts/:subCategory", async (req, res) => {
-      const subCategory = req.params.subCategory.toLowerCase(); // Convert to lowercase for case-insensitive matching
+      const subCategory = req.params.subCategory.toLowerCase(); 
       const query = { subCategory: subCategory };
       try {
         const result = await productsCollection.find(query).toArray();
@@ -158,6 +158,7 @@ async function run() {
         const query = {
           productId: cartProduct.productId,
           email: cartProduct.email,
+          price: cartProduct.price,
         };
         const existingProduct = await cartProductsCollection.findOne(query);
         if (existingProduct) {
@@ -170,14 +171,24 @@ async function run() {
         res.status(500).send({ message: "Internal server error" });
       }
     });
+    app.get("/cartProducts", async (req, res) => {
+      const result = await cartProductsCollection.find().toArray();
+      res.send(result);
+    });
     app.get("/cartProducts/:email", async (req, res) => {
       const email = req.params.email;
       const query = { email: email };
       const result = await cartProductsCollection.find(query).toArray();
       res.send(result);
     });
+    app.delete("/cartProducts/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const result = await cartProductsCollection.deleteOne(query);
+      res.send(result);
+    });
 
-    // feedback section here
+    
   } catch (error) {
     console.log(error);
   }
