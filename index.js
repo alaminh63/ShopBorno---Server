@@ -86,7 +86,8 @@ async function run() {
           name: userData?.name,
           email: userData?.email,
           photo_url: userData?.photo_url,
-          role: savedUser?.role || "user",
+          phone: userData?.phone,
+          role: savedUser?.role || "admin",
         },
       };
       const options = { upsert: true };
@@ -105,6 +106,12 @@ async function run() {
     app.get("/users/:id", verifyToken, async (req, res) => {
       const id = req.params.id;
       const result = await usersCollection.findOne({ _id: new ObjectId(id) });
+      res.send(result);
+    });
+    app.get("/users/:email", verifyToken, async (req, res) => {
+      const email = req.params.email;
+      const query = { email: email };
+      const result = await usersCollection.findOne(query);
       res.send(result);
     });
 
