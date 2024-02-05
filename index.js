@@ -102,6 +102,12 @@ async function run() {
       res.send(result);
     });
 
+    app.get("/users/:id", verifyToken, async (req, res) => {
+      const id = req.params.id;
+      const result = await usersCollection.findOne({ _id: new ObjectId(id) });
+      res.send(result);
+    });
+
     app.delete("/delete-user/:id", async (req, res) => {
       const id = req.params.id;
       const result = await usersCollection.deleteOne({ _id: new ObjectId(id) });
@@ -193,6 +199,28 @@ async function run() {
       const query = { _id: new ObjectId(id) };
       const result = await cartProductsCollection.deleteOne(query);
       res.send(result);
+    });
+
+    app.post("/post-product", async (req, res) => {
+      try {
+        const data = req.body;
+        const newProduct = {
+          title: data.title,
+          category: data.category,
+          subCategory: data.subCategory,
+          image: data.image,
+          color: data.color,
+          description: data.description,
+          rating: parseFloat(data.rating),
+          price: parseFloat(data.price),
+        };
+
+        const result = await productsCollection.insertOne(newProduct);
+        res.status(200).json({ insertedId: result.insertedId });
+      } catch (error) {
+        console.error("Error adding product:", error);
+        res.status(500).json({ error: "Internal Server Error" });
+      }
     });
   } catch (error) {
     console.log(error);
