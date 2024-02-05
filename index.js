@@ -97,12 +97,12 @@ async function run() {
     // instructors requests section
 
     // admin page req section here
-    app.get("/users", verifyToken, async (req, res) => {
+    app.get("/users", async (req, res) => {
       const result = await usersCollection.find().toArray();
       res.send(result);
     });
 
-    app.delete("/delete-user/:id", verifyToken, async (req, res) => {
+    app.delete("/delete-user/:id", async (req, res) => {
       const id = req.params.id;
       const result = await usersCollection.deleteOne({ _id: new ObjectId(id) });
       res.send(result);
@@ -111,6 +111,13 @@ async function run() {
     // get all the products
     app.get("/products", async (req, res) => {
       const result = await productsCollection.find().toArray();
+      res.send(result);
+    });
+    app.delete("/delete-product/:id", async (req, res) => {
+      const id = req.params.id;
+      const result = await productsCollection.deleteOne({
+        _id: new ObjectId(id),
+      });
       res.send(result);
     });
 
@@ -127,7 +134,7 @@ async function run() {
       }
     });
     app.get("/subProducts/:subCategory", async (req, res) => {
-      const subCategory = req.params.subCategory.toLowerCase(); 
+      const subCategory = req.params.subCategory.toLowerCase();
       const query = { subCategory: subCategory };
       try {
         const result = await productsCollection.find(query).toArray();
@@ -187,8 +194,6 @@ async function run() {
       const result = await cartProductsCollection.deleteOne(query);
       res.send(result);
     });
-
-    
   } catch (error) {
     console.log(error);
   }
